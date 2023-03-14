@@ -7,8 +7,6 @@ services:
     volumes:
       - /app/node_modules
       - ./backend:/app
-    ports:
-      - '4000:4000'
   frontend:
     build:
       dockerfile: Dockerfile.dev
@@ -16,5 +14,12 @@ services:
     volumes:
       - /app/node_modules
       - ./frontend:/app
+    environment:
+      - WDS_SOCKET_PORT=0
+  nginx:
+    restart: always
+    build:
+      dockerfile: Dockerfile
+      context: ./nginx
     ports:
-      - '3000:3000'
+      - '3050:80'
