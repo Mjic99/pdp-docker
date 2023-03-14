@@ -6,7 +6,7 @@ const PORT = 4000;
 
 app.use(cors());
 
-app.get('/api/products', (req, res) => {
+app.get('/products', (req, res) => {
     res.send([
         {
             id: 1,
