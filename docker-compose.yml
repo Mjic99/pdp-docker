@@ -8,3 +8,9 @@ services:
     image: mjic99/backend
     mem_limit: 128m
     hostname: backend
+  nginx:
+    image: mjic99/pdp-nginx
+    mem_limit: 128m
+    hostname: nginx
+    ports:
+      - 80:80
