@@ -1,0 +1,52 @@
+name: Deploy services
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: docker build -t mjic99/frontend-test -f ./frontend/Dockerfile.dev ./frontend
+      - run: docker run -e CI=true mjic99/frontend-test npm test
+
+  build-frontend:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+      - run: docker build -t mjic99/frontend ./frontend
+      - run: docker push mjic99/frontend
+
+  build-backend:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+      - run: docker build -t mjic99/backend ./backend
+      - run: docker push mjic99/backend
+
+#  deploy:
+#    needs: [test, build-client, build-nginx, build-server, build-worker]
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v2
+#
+#      - name: Generate deployment package
+#        run: zip -r deploy.zip . -x '*.git*'
+#
+#      - name: Deploy to EB
+#        uses: einaregilsson/beanstalk-deploy@v18
+#        with:
+#          aws_access_key: ${{ secrets.AWS_ACCESS_KEY }}
+#          aws_secret_key: ${{ secrets.AWS_SECRET_KEY }}
+#          application_name: multi-docker
+#          environment_name: Multidocker-env
+#          existing_bucket_name: elasticbeanstalk-us-east-2-361835183130
+#          region: us-east-2
+#          version_label: ${{ github.sha }}
+#          deployment_package: deploy.zip
